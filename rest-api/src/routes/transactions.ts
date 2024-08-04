@@ -2,10 +2,17 @@ import { FastifyInstance } from 'fastify';
 import { dbConn } from '../database';
 import { z } from 'zod';
 import { randomUUID } from 'node:crypto';
+import { checkSessionId } from '../middlewares/check-session-id';
 
 export async function transactionRoutes(app: FastifyInstance) {
-  app.get('/', async () => {
-    const transactions = await dbConn('transactions').select();
+  app.addHook('preHandler', checkSessionId);
+
+  app.get('/', async (request, reply) => {
+    const { sessionId } = request.cookies;
+
+    const transactions = await dbConn('transactions')
+      .where('session_id', sessionId)
+      .select();
 
     return { transactions };
   });
@@ -17,13 +24,25 @@ export async function transactionRoutes(app: FastifyInstance) {
 
     const { id } = getTransactionParamSchema.parse(request.params);
 
-    const transaction = await dbConn('transactions').where('id', id).first();
+    const { sessionId } = request.cookies;
+
+    const transaction = await dbConn('transactions')
+      .where({
+        id: id,
+        session_id: sessionId,
+      })
+      .first();
 
     return { transaction };
   });
 
-  app.get('/summary', async () => {
+  app.get('/summary', async (request) => {
+    const { sessionId } = request.cookies;
+
     const summary = await dbConn('transactions')
+      .where({
+        session_id: sessionId,
+      })
       .sum('amount', { as: 'amount' })
       .first();
 
@@ -41,10 +60,22 @@ export async function transactionRoutes(app: FastifyInstance) {
       request.body,
     );
 
+    let sessionId = request.cookies.sessionId;
+
+    if (!sessionId) {
+      sessionId = randomUUID();
+
+      reply.cookie('sessionId', sessionId, {
+        path: '/',
+        maxAge: 60 * 60 * 24, // 24 hours
+      });
+    }
+
     await dbConn('transactions').insert({
       id: randomUUID(),
       title: title,
       amount: type === 'income' ? amount : amount * -1,
+      session_id: sessionId,
     });
 
     return reply.status(201).send();

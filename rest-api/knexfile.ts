@@ -1,9 +1,16 @@
 import type { Knex } from 'knex';
-import { knexConfig } from './src/database';
 
 const config: { [key: string]: Knex.Config } = {
   development: {
-    ...knexConfig,
+    client: 'pg',
+    connection: {
+      host: 'localhost',
+      port: 5432,
+      user: 'postgres',
+      database: 'rest-api',
+      password: 'postgres',
+    },
+    useNullAsDefault: true,
     migrations: {
       extension: 'ts',
       directory: 'knex/migrations',
