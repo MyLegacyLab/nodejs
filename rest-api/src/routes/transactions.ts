@@ -5,9 +5,7 @@ import { randomUUID } from 'node:crypto';
 import { checkSessionId } from '../middlewares/check-session-id';
 
 export async function transactionRoutes(app: FastifyInstance) {
-  app.addHook('preHandler', checkSessionId);
-
-  app.get('/', async (request, reply) => {
+  app.get('/', { preHandler: checkSessionId }, async (request, reply) => {
     const { sessionId } = request.cookies;
 
     const transactions = await dbConn('transactions')
@@ -17,7 +15,7 @@ export async function transactionRoutes(app: FastifyInstance) {
     return { transactions };
   });
 
-  app.get('/:id', async (request) => {
+  app.get('/:id', { preHandler: checkSessionId }, async (request) => {
     const getTransactionParamSchema = z.object({
       id: z.string().uuid(),
     });
@@ -36,7 +34,7 @@ export async function transactionRoutes(app: FastifyInstance) {
     return { transaction };
   });
 
-  app.get('/summary', async (request) => {
+  app.get('/summary', { preHandler: checkSessionId }, async (request) => {
     const { sessionId } = request.cookies;
 
     const summary = await dbConn('transactions')

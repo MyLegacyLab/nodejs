@@ -5,11 +5,12 @@
   "main": "index.js",
   "scripts": {
     "dev": "npx tsx watch ./src/server.ts",
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "npx vitest -r test/",
+    "coverage": "npx vitest -r test/ run --coverage",
     "knex:run": "npx --loader tsx ./node_modules/.bin/knex --knexfile ./knexfile.ts",
     "migrate:make": "npm run knex:run -- migrate:make -x ts --",
     "migrate:latest": "npm run knex:run -- migrate:latest",
-    "migrate:rollback": "npm run knex:run -- migrate:rollback",
+    "migrate:rollback": "npm run knex:run -- migrate:rollback --",
     "format": "npx prettier . --write",
     "lint": "npx eslint . --fix"
   },
@@ -21,6 +22,7 @@
     "@eslint/js": "^9.8.0",
     "@trivago/prettier-plugin-sort-imports": "^4.3.0",
     "@types/node": "^22.1.0",
+    "@types/supertest": "^6.0.2",
     "@typescript-eslint/eslint-plugin": "^8.0.0",
     "@typescript-eslint/parser": "^8.0.0",
     "eslint": "^9.8.0",
@@ -29,8 +31,10 @@
     "eslint-plugin-simple-import-sort": "^12.1.1",
     "globals": "^15.9.0",
     "prettier": "^3.3.3",
+    "supertest": "^7.0.0",
     "typescript": "^5.5.4",
-    "typescript-eslint": "^8.0.0"
+    "typescript-eslint": "^8.0.0",
+    "vitest": "^2.0.5"
   },
   "dependencies": {
     "@fastify/cookie": "^9.3.1",

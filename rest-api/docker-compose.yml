@@ -3,13 +3,13 @@ version: '3.8'
 services:
   postgres:
     image: postgres:latest
-    container_name: postgres
+    container_name: test-postgres
     ports:
       - '5432:5432'
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: rest-api
+      POSTGRES_DB: test-rest-api
     volumes:
       - ./pgdata:/var/lib/postgresql/data
 
